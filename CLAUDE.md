@@ -9,11 +9,30 @@ forging anything. The skills in `.claude/skills/` are the detailed manuals,
 A **self-revising toolsmith** for one developer. Not a product, not a fixed
 platform. It observes how *this* developer drives coding agents — across **every
 agent they use** — makes that picture legible, and helps forge personal tools that
-fit, re-fitting as the workflow changes. See `README.md` for the full philosophy.
+fit, re-fitting as the workflow changes. See `README.md` for why it exists.
 
 This repo is a **starter template**, not an app you install. The user cloned it,
 deleted `.git`, and started their own history. After that, **it is all theirs** —
 the base/forged split below is for legibility, not protection.
+
+## Philosophy
+
+The principles behind the rules below:
+
+- **Restore the craftsman.** A craftsman makes their own jigs and balances their
+  own hammer. Where AI threatens to turn developers into assembly-line
+  prompt-feeders, Jigsmith rebuilds the craftsman who forges personal tools —
+  human-system and tool-system co-evolving, Engelbart-style, for one person.
+- **No types, no buckets.** The moment you match a person to an archetype you stop
+  fitting *them*. Every workbench is N=1 — grown from the individual's own data,
+  never selected from a menu. The Fingerprint's *sections* are fixed analytical
+  **lenses**, not person-types: they let you compare yourself to yourself over time.
+- **Human-driven, not autonomous.** The goal is not a Jarvis that hides the work.
+  It is to make the developer **more conscious** of their own workflow, so
+  painpoints are easy to see and act on. Consciousness over convenience.
+
+The **master/apprentice rule** and **disposability** sections below are the other
+two pillars.
 
 ## The master/apprentice rule
 
@@ -31,7 +50,7 @@ Draw a hard line and keep runtime judgment quarantined:
   payback arithmetic, data loading (`tui/data/store.py`), rendering. This code runs
   every frame; it must never call an agent (save the one documented exception below).
 - **Agentic** — judgment and creation. Naming a "90% pattern", deciding
-  mechanical-vs-craft, forging a jig, composing the Profile. This happens at an
+  mechanical-vs-craft, forging a jig, composing the Fingerprint. This happens at an
   **explicit action** (a skill the agent runs on purpose), writes its result to
   disk, and the deterministic system then only *reads* that result.
 
@@ -96,12 +115,12 @@ core/                deterministic engine                                    (ba
 sections.json        the section registry (the lenses)                       (base)
 knowledge/           curated best-practice rubrics, one per lens             (yours)
 tui/
-  app.py             shell: Profile/Workbench/Forge tabs + command palette    (base)
+  app.py             shell: Fingerprint/Workbench/Forge tabs + command palette (base)
   data/store.py      runs the engine + the agentic phases (reads the JSON)    (base)
   panels/contract.py · components.py   render helpers + fixed component TYPEs  (base)
   panels/forged/     new component TYPEs you forge (rare)                     (FORGED)
-  config/profile.json  agent-authored Profile spec (boxes + inline data)      (yours)
-  screens/           Profile / Workbench / Forge / pickers                    (base)
+  config/profile.json  agent-authored Fingerprint spec (boxes + inline data)  (yours)
+  screens/           Fingerprint / Workbench / Forge / pickers                (base)
 jigsmith.db          rack + settings (gitignored)                            (yours)
 signals.json patterns.json   mined data + ranked candidates (gitignored)      (yours)
 .claude/skills/      this operating manual                          (base seed, yours)
@@ -111,7 +130,7 @@ signals.json patterns.json   mined data + ranked candidates (gitignored)      (y
 
 ## Fixed vs dynamic (the three layers)
 
-1. **Skeleton** — top-level tabs (Profile / Workbench / Forge) + the **section
+1. **Skeleton** — top-level tabs (Fingerprint / Workbench / Forge) + the **section
    registry** (`sections.json`): the fixed analytical lenses. Stable so you can diff
    yourself over time and each lens has a specialist. Fixed code/data.
 2. **Components** — reusable boxes (`counters`, `bars`, `histogram`, `blocks`,
@@ -126,11 +145,11 @@ itself over time.
 
 ## The surfaces
 
-- **Profile (home)** — the mirror: the six descriptive section-lenses (Usage,
+- **Fingerprint (home)** — the mirror: the six descriptive section-lenses (Usage,
   Sessions, Loop, Context, Harness, Shell), agent-authored from the signals and rendered
   from the fixed components. Run the miner, then rebuild with `build-profile`. The
   `forge` rollup is mined here but *shown on the Forge tab*, not duplicated as a
-  Profile section.
+  Fingerprint section.
 - **Workbench** — the rack of forged jigs, disposability visible.
 - **Forge** — the hand-off: pick a mined candidate (the `forge` rollup's
   `patterns.json`), hand it to a live agent session.
@@ -145,7 +164,7 @@ Cross-assistant config *management* is out of scope (CC Switch et al. own it).
 | make a new tool/skill/hook/script | `forge-jig` |
 | mine → analyze → report the 90% patterns (full pipeline) | `scanner` |
 | refresh the signals only (phase 1) | `run-miner` |
-| (re)build the Profile from the data (phase 3) | `build-profile` |
+| (re)build the Fingerprint from the data (phase 3) | `build-profile` |
 | add a new component TYPE (rare) | `forge-component` |
 | the propose→feedback→adjust loop | `tend-workbench` |
 | retire an unused jig | `dispose-jig` |
