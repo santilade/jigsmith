@@ -1,0 +1,19 @@
+{
+  "id": "codex",
+  "label": "Codex CLI",
+  "tag": "cx",
+  "cli": "codex",
+  "run": {
+    "headless": ["codex", "exec", "{prompt}"],
+    "interactive": ["codex"]
+  },
+  "inspect": {
+    "history": {"glob": "~/.codex/sessions/**/*.jsonl", "format": "openai-jsonl"},
+    "settings": {
+      "config": "~/.codex/config.toml",
+      "mcp": "~/.codex/config.toml",
+      "agents": "~/.codex/prompts",
+      "memory": "~/.codex/AGENTS.md"
+    }
+  }
+}

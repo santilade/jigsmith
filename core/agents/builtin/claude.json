@@ -1,0 +1,22 @@
+{
+  "id": "claude",
+  "label": "Claude Code",
+  "tag": "cc",
+  "cli": "claude",
+  "run": {
+    "headless": ["claude", "-p", "{prompt}", "--add-dir", "{add_dir}", "--dangerously-skip-permissions"],
+    "interactive": ["claude", "{prompt}", "--add-dir", "{add_dir}"]
+  },
+  "inspect": {
+    "history": {"glob": "~/.claude/projects/*/*.jsonl", "format": "claude-jsonl"},
+    "settings": {
+      "config": "~/.claude/settings.json",
+      "mcp": "~/.claude.json",
+      "skills": "~/.claude/skills",
+      "agents": "~/.claude/agents",
+      "commands": "~/.claude/commands",
+      "output_styles": "~/.claude/output-styles",
+      "memory": "~/.claude/CLAUDE.md"
+    }
+  }
+}

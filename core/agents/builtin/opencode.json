@@ -1,0 +1,19 @@
+{
+  "id": "opencode",
+  "label": "opencode",
+  "tag": "oc",
+  "cli": "opencode",
+  "run": {
+    "headless": ["opencode", "run", "{prompt}"],
+    "interactive": ["opencode"]
+  },
+  "inspect": {
+    "history": {"glob": "~/.local/share/opencode/storage/**/*.json", "format": "opencode-store"},
+    "settings": {
+      "config": "~/.config/opencode/opencode.json",
+      "mcp": "~/.config/opencode/opencode.json",
+      "agents": "~/.config/opencode/agent",
+      "memory": "~/.config/opencode/AGENTS.md"
+    }
+  }
+}

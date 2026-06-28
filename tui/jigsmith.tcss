@@ -1,0 +1,303 @@
+/* Jigsmith TUI styling. Calm map, not a cockpit. */
+
+TabbedContent {
+    height: 1fr;
+}
+
+/* The primary tab bar is hidden — sections are entered from the home launcher,
+   and inside a section the only visible tabs are its sub-tabs (e.g. Profile's
+   section sub-tabs). The nested sub-tab bars are deeper descendants, so this
+   direct-child rule hits only the top-level bar. */
+#tabs > ContentTabs {
+    display: none;
+}
+
+/* ---- Forge: pick a candidate, hand it to a live agent ---- */
+ForgeScreen {
+    height: 1fr;
+}
+
+#forge-head, #wb-head, #profile-head {
+    padding: 1 2 0 2;
+    height: auto;
+}
+
+.empty-state {
+    padding: 2 2;
+    height: auto;
+    color: $text-muted;
+}
+
+#forge-body {
+    height: 1fr;
+    padding: 1 1 0 1;
+}
+
+/* keep the header a single line — never expand on click */
+Header, Header.-tall {
+    height: 1;
+}
+
+/* ---- Workbench: assistant-config manager ---- */
+WorkbenchScreen {
+    height: 1fr;
+}
+
+#inv-toolbar {
+    height: auto;
+    padding: 1 1 0 1;
+    margin-bottom: 1;
+    align: left top;
+}
+
+#inv-toolbar Select {
+    width: 1fr;
+    margin: 0 1 0 0;
+}
+
+ScopePane {
+    height: 1fr;
+}
+
+.inv-table {
+    width: 1fr;
+    height: 1fr;
+}
+
+.inv-detail {
+    width: 48;
+    height: 1fr;
+    padding: 1 2;
+    border: round $primary;
+    border-title-color: $accent;
+    margin: 0 1 1 1;
+}
+
+/* agent-picker modals */
+InspectModal,
+DefaultAgentModal {
+    align: center middle;
+}
+
+#pick-form {
+    width: 50;
+    height: auto;
+    padding: 1 2;
+    border: round $primary;
+    border-title-color: $accent;
+    background: $surface;
+}
+
+#pick-title {
+    text-style: bold;
+    color: $accent;
+}
+
+#pick-sub {
+    color: $text-muted;
+    margin-bottom: 1;
+}
+
+#pick-form Checkbox {
+    width: 100%;
+    border: none;
+    background: transparent;
+}
+
+#pick-form RadioSet {
+    width: 100%;
+    border: none;
+    background: transparent;
+    margin-bottom: 1;
+}
+
+#pick-hint {
+    color: $text-muted;
+    margin-top: 1;
+}
+
+#pick-note {
+    width: 1fr;          /* fill the form so the long note wraps instead of clipping */
+    color: $text-muted;
+    text-style: italic;
+    margin-bottom: 1;
+}
+
+#add-sub {
+    color: $text-muted;
+    margin-bottom: 1;
+}
+
+/* add-item modal */
+AddItemModal {
+    align: center middle;
+}
+
+#add-form {
+    width: 60;
+    height: auto;
+    padding: 1 2;
+    border: round $primary;
+    border-title-color: $accent;
+    background: $surface;
+}
+
+#add-title {
+    text-style: bold;
+    color: $accent;
+    margin-bottom: 1;
+}
+
+#add-form Select, #add-form Input {
+    margin-bottom: 1;
+}
+
+#add-buttons {
+    height: auto;
+    align: right middle;
+}
+
+#add-buttons Button {
+    margin-left: 2;
+}
+
+/* ---- Profile: section sub-tabs ---- */
+#section-tabs {
+    height: 1fr;
+}
+
+#section-tabs VerticalScroll {
+    padding: 1 1 0 1;       /* a little breathing room under the sub-tabs */
+}
+
+BoxBase {
+    border: round $primary;
+    border-title-color: $accent;
+    height: auto;
+    min-height: 7;
+    margin: 0 1 1 1;        /* one blank line between stacked rows */
+    padding: 1 2;           /* inner padding so charts don't touch the border */
+}
+
+/* breathing room above both the primary tabs and the section sub-tabs */
+Tabs {
+    margin-top: 1;
+}
+
+/* side-by-side rows: equal width, height grows to fit content so verbose
+   notes never clip. Row height = the taller column; each box sizes to its own
+   content (min-height keeps short ones from collapsing). */
+.panel-row {
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+.panel-row > BoxBase {
+    width: 1fr;
+    height: auto;
+    min-height: 15;
+    margin: 0 1;
+}
+
+/* counter strip — boxes side by side, equal height, mirroring HTML stats grid */
+CountersBox {
+    height: 7;
+    margin: 0 0 1 0;
+}
+
+.counter {
+    width: 1fr;
+    height: 100%;
+    border: round $primary;
+    padding: 1 1;
+    margin: 0 1;
+    content-align: center middle;
+    text-align: center;
+}
+
+/* ---- Home launcher (neovim-dashboard look) ---- */
+HomeScreen {
+    background: $background;
+}
+
+#home {
+    width: 1fr;
+    height: 1fr;
+}
+
+#home-logo {
+    width: auto;
+    height: auto;
+    color: $accent;
+    text-style: bold;
+    margin-bottom: 2;
+}
+
+#home-menu {
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+#home-menu > ListItem {
+    width: auto;
+    background: transparent;
+    padding: 0 1;
+    color: $text;
+}
+
+#home-menu > #home-palette {
+    margin-top: 1;
+}
+
+#home-menu > ListItem.--highlight {
+    background: $boost;
+    color: $accent;
+    text-style: bold;
+}
+
+#home-menu:focus > ListItem.--highlight {
+    background: $boost;
+}
+
+#home-tagline {
+    width: 76;
+    margin-top: 3;
+    color: $text-muted;
+    text-align: center;
+}
+
+/* ---- Pattern-miner progress popup ---- */
+PipelineProgress {
+    align: center middle;
+}
+
+#pipeline-dialog {
+    width: 64;
+    height: auto;
+    padding: 1 2;
+    border: round $primary;
+    border-title-color: $accent;
+    background: $surface;
+}
+
+.phase-row {
+    height: 1;
+    margin: 0 0 1 0;
+}
+
+#pipeline-status {
+    height: auto;
+    margin-top: 1;
+    color: $text-muted;
+}
+
+.ph-pending { color: $text-muted; }
+.ph-running { color: $accent; text-style: bold; }
+.ph-done    { color: $success; }
+.ph-error   { color: $error; text-style: bold; }
+
+/* footer: spacer pushes the esc/quit keys to the right edge */
+JigFooter .footer-spacer { width: 1fr; }

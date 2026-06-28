@@ -1,0 +1,16 @@
+[
+  { "id": "usage",    "title": "Usage",                   "signals": ["usage"],    "rubric": "knowledge/usage.md",    "analyzer": "usage-analyst",
+    "lens": "what / when / how much — hours, tokens, projects, models, cadence, and the per-agent split" },
+  { "id": "sessions", "title": "Sessions & orchestration","signals": ["sessions"], "rubric": "knowledge/sessions.md", "analyzer": "sessions-analyst",
+    "lens": "how you drive — session length, sub-agents, parallel/multi-agent use, project juggling, babysitting wait" },
+  { "id": "loop",     "title": "Loop",                    "signals": ["loop"],     "rubric": "knowledge/loop.md",     "analyzer": "loop-analyst",
+    "lens": "the inner agentic loop — tool-calls per turn, autonomy leash, the explore→edit→verify tool grammar, delegation fan-out, interrupt/re-steer cadence" },
+  { "id": "context",  "title": "Context",                 "signals": ["context"],  "rubric": "knowledge/context.md",  "analyzer": "context-analyst",
+    "lens": "what enters the window — memory weight, repeated preambles, MCP surface configured vs exercised" },
+  { "id": "harness",  "title": "Harness",                 "signals": ["harness"],  "rubric": "knowledge/harness.md",  "analyzer": "harness-analyst",
+    "lens": "the static rig — installed skills/agents/commands/MCP joined against what's actually invoked (dead config)" },
+  { "id": "shell",    "title": "Shell & manual work",     "signals": ["shell"],    "rubric": "knowledge/shell.md",    "analyzer": "shell-analyst",
+    "lens": "what you still do by hand — shell vocabulary, session correlation, installed-vs-used tools (unused, suboptimal)" },
+  { "id": "forge",    "title": "Forge Candidates",        "rollup": true,          "rubric": "knowledge/forge.md",    "analyzer": "recommendations",
+    "lens": "ROLLUP — collect every section's suggestions, dedup, rank by payback, write patterns.json (the Forge tab's candidates). NOT a Profile section — the Profile is the mirror; the Forge tab owns these." }
+]

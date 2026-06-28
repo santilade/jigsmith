@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Jigsmith — the developer's own data (regenerate with the miner)
+jigsmith.db
+jigsmith.db-journal
+rack.db
+signals.json
+patterns.json
+tui/config/profile.json.bak
+
+# user-registered agent/shell manifests live in ~/.config/jigsmith, not here
+
+# OS
+.DS_Store
