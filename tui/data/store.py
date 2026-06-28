@@ -23,7 +23,9 @@ from core.store.db import REPO_ROOT
 
 PROFILE_PATH = os.path.join(REPO_ROOT, "tui", "config", "profile.json")
 PATTERNS_PATH = os.path.join(REPO_ROOT, "patterns.json")
-PHASE_TIMEOUT = 1200  # hard cap per agent phase so a stuck run can't hang forever
+PHASE_TIMEOUT = 2400  # hard cap per agent phase; a slow local model's single-shot
+#                       report write alone can run several minutes, so the cap is
+#                       generous — it exists to kill a truly stuck run, not a slow one.
 
 # source name -> absolute path
 SOURCES = {

@@ -29,8 +29,9 @@ from core import agents
 # new streaming agent format is one entry here, no other code.
 
 
-def _claude_tool_brief(inp: dict) -> str:
-    for k in ("file_path", "path", "pattern", "command", "description", "prompt"):
+def _tool_brief(inp: dict) -> str:
+    for k in ("file_path", "filePath", "path", "pattern", "command",
+              "description", "prompt"):
         v = inp.get(k)
         if v:
             return f"({str(v).splitlines()[0][:60]})"
@@ -50,13 +51,33 @@ def _parse_claude_stream(evt: dict) -> str | None:
                     out.append(txt.splitlines()[0][:100])
             elif p.get("type") == "tool_use":
                 out.append(f"→ {p.get('name') or 'tool'}"
-                           f"{_claude_tool_brief(p.get('input') or {})}")
+                           f"{_tool_brief(p.get('input') or {})}")
         return "  ".join(out) or None
     return None  # tool results, deltas, the final `result` — not log lines
 
 
+def _parse_opencode_stream(evt: dict) -> str | None:
+    # opencode --format json emits one object per step: step_start, text
+    # (assistant prose, reasoning fenced in a <think> block), tool_use, step_finish.
+    t = evt.get("type")
+    part = evt.get("part") or {}
+    if t == "step_start":
+        return "· session started"
+    if t == "text":
+        txt = (part.get("text") or "").strip()
+        if "</think>" in txt:  # drop the reasoning prefix, keep the visible answer
+            txt = txt.rsplit("</think>", 1)[-1].strip()
+        return txt.splitlines()[0][:100] if txt else None
+    if t == "tool_use":
+        name = part.get("tool") or "tool"
+        inp = (part.get("state") or {}).get("input") or {}
+        return f"→ {name}{_tool_brief(inp)}"
+    return None  # step_finish, results — not log lines
+
+
 _STREAM_PARSERS: dict[str, Callable[[dict], str | None]] = {
     "claude-stream-json": _parse_claude_stream,
+    "opencode-json": _parse_opencode_stream,
 }
 
 

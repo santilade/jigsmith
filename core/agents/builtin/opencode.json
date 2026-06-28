@@ -4,7 +4,9 @@
   "tag": "oc",
   "cli": "opencode",
   "run": {
-    "headless": ["opencode", "run", "{prompt}"],
+    "headless": ["opencode", "run", "--dangerously-skip-permissions", "{prompt}"],
+    "headless_stream": ["opencode", "run", "--dangerously-skip-permissions", "--format", "json", "{prompt}"],
+    "stream_format": "opencode-json",
     "interactive": ["opencode"]
   },
   "inspect": {
