@@ -64,6 +64,18 @@ class AgentManifest:
                           {"prompt": prompt, "cwd": cwd, "add_dir": add_dir,
                            "timeout": timeout})
 
+    def headless_stream_argv(self, prompt: str, *, cwd: str, add_dir: str,
+                             timeout: int) -> list[str] | None:
+        """Streaming variant — emits per-step events for live tailing. Optional;
+        only the default agent declares `run.headless_stream`. None → no stream."""
+        return self._argv(self.run.get("headless_stream"),
+                          {"prompt": prompt, "cwd": cwd, "add_dir": add_dir,
+                           "timeout": timeout})
+
+    def stream_format(self) -> str:
+        """Event format emitted by the streaming runner (keys run.py's parser)."""
+        return self.run.get("stream_format", "")
+
     def interactive_argv(self, prompt: str | None = None, *,
                          add_dir: str = "") -> list[str] | None:
         return self._argv(self.run.get("interactive"),

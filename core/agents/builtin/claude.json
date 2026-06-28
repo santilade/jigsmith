@@ -5,6 +5,8 @@
   "cli": "claude",
   "run": {
     "headless": ["claude", "-p", "{prompt}", "--add-dir", "{add_dir}", "--dangerously-skip-permissions"],
+    "headless_stream": ["claude", "-p", "{prompt}", "--add-dir", "{add_dir}", "--dangerously-skip-permissions", "--output-format", "stream-json", "--verbose"],
+    "stream_format": "claude-stream-json",
     "interactive": ["claude", "{prompt}", "--add-dir", "{add_dir}"]
   },
   "inspect": {

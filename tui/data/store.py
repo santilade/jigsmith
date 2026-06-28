@@ -112,10 +112,10 @@ class DataStore:
         return ok, msg
 
     # ---- phases 2-3: agentic (the documented quarantine exception) ----
-    def analyze_phase(self) -> tuple[bool, str]:
+    def analyze_phase(self, cancel=None, on_line=None) -> tuple[bool, str]:
         """signals.json -> patterns.json (one headless agent run). Reloads after."""
         ok, msg = run.headless(ANALYZE_PROMPT, cwd=REPO_ROOT, add_dir=REPO_ROOT,
-                               timeout=PHASE_TIMEOUT)
+                               timeout=PHASE_TIMEOUT, cancel=cancel, on_line=on_line)
         self.load()
         if ok and not self.has("patterns"):
             return False, "agent finished but patterns.json missing"
@@ -138,9 +138,9 @@ class DataStore:
         with open(PROFILE_PATH, "w") as fh:
             json.dump(skeleton, fh, indent=2)
 
-    def report_phase(self) -> tuple[bool, str]:
+    def report_phase(self, cancel=None, on_line=None) -> tuple[bool, str]:
         """patterns.json -> tui/config/profile.json (one headless agent run)."""
         self.reset_profile()
         ok, msg = run.headless(REPORT_PROMPT, cwd=REPO_ROOT, add_dir=REPO_ROOT,
-                               timeout=PHASE_TIMEOUT)
+                               timeout=PHASE_TIMEOUT, cancel=cancel, on_line=on_line)
         return (ok, "profile.json rebuilt") if ok else (ok, msg)

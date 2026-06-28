@@ -288,6 +288,16 @@ PipelineProgress {
     margin: 0 0 1 0;
 }
 
+#pipeline-dialog Log {
+    height: 8;
+    margin: 0 0 1 2;
+    padding: 0 1;
+    border: round $panel;
+    background: $boost;
+    color: $text-muted;
+    scrollbar-size: 1 1;
+}
+
 #pipeline-status {
     height: auto;
     margin-top: 1;

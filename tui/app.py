@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import threading
 
 from textual import events, work
 from textual.app import App, ComposeResult
@@ -178,7 +179,11 @@ class JigsmithApp(App):
         self.run_scanner()
 
     def run_scanner(self) -> None:
-        self._progress = PipelineProgress()
+        # Shared cancel token: the modal sets it (c key), the worker + the agent
+        # subprocess poll it. Phase 1 (in-process mine) is checked between phases,
+        # not interruptible mid-run; phases 2-3 kill the agent on cancel.
+        self._cancel = threading.Event()
+        self._progress = PipelineProgress(cancel=self._cancel)
         self.push_screen(self._progress)
         self._run_pipeline_worker()
 
@@ -189,15 +194,26 @@ class JigsmithApp(App):
 
     @work(thread=True, exclusive=True)
     def _run_pipeline_worker(self) -> None:
+        cancel = self._cancel
+        # Tail the agent's live steps into the modal's log pane. The worker runs
+        # off the UI thread, so marshal each line back through call_from_thread.
+        def log(line: str) -> None:
+            self.call_from_thread(self._progress.append_log, line)
         # Three steps, driven one at a time so the popup can show per-phase state.
+        # Agentic phases take the cancel token so a force-exit kills the agent.
         steps = [
             ("Mine", self.store.run_miner),
-            ("Analyze", self.store.analyze_phase),
-            ("Report", self.store.report_phase),
+            ("Analyze", lambda: self.store.analyze_phase(cancel=cancel, on_line=log)),
+            ("Report", lambda: self.store.report_phase(cancel=cancel, on_line=log)),
         ]
         ok = True
         last = ""
         for i, (_name, fn) in enumerate(steps):
+            if cancel.is_set():
+                ok, last = False, "cancelled"
+                for j in range(i, len(steps)):
+                    self.call_from_thread(self._progress.set_phase, j, "skipped")
+                break
             self.call_from_thread(self._progress.set_phase, i, "running")
             step_ok, msg = fn()
             last = msg
