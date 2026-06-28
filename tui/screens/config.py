@@ -171,6 +171,36 @@ class ShellModal(ModalScreen):
         self.dismiss(None)
 
 
+class ConfirmModal(ModalScreen):
+    """Yes/no confirmation → dismiss True (y) or False (n / esc).
+
+    Keyboard-only, defaults to no — only an explicit y commits. Used to gate
+    destructive actions like clearing the workspace.
+    """
+
+    BINDINGS = [
+        ("y", "confirm", "Yes"),
+        ("n,escape", "cancel", "No"),
+    ]
+
+    def __init__(self, title: str, body: str) -> None:
+        super().__init__()
+        self._title = title
+        self._body = body
+
+    def compose(self) -> ComposeResult:
+        with Vertical(id="pick-form"):
+            yield Label(self._title, id="pick-title")
+            yield Label(self._body, id="pick-sub")
+            yield Label("y yes · n no", id="pick-hint")
+
+    def action_confirm(self) -> None:
+        self.dismiss(True)
+
+    def action_cancel(self) -> None:
+        self.dismiss(False)
+
+
 class DefaultAgentModal(ModalScreen):
     """Single-select the default agent (runs the agentic flows) → id or None."""
 

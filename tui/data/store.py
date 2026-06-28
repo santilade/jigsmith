@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 
 from core import run
 from core.mine import SIGNALS_PATH
-from core.store.db import REPO_ROOT
+from core.store.db import DB_PATH, REPO_ROOT
 
 PROFILE_PATH = os.path.join(REPO_ROOT, "tui", "config", "profile.json")
 PATTERNS_PATH = os.path.join(REPO_ROOT, "patterns.json")
@@ -112,6 +112,28 @@ class DataStore:
         ok, msg = mine.run()
         self.load()
         return ok, msg
+
+    # ---- reset to fresh-clone state (explicit action) ----
+    def reset_workspace(self) -> tuple[bool, str]:
+        """Wipe all mined data + machine-local settings back to a fresh clone.
+
+        Deletes the gitignored artifacts (signals.json, patterns.json,
+        jigsmith.db = rack + settings) and blanks the tracked Profile spec back
+        to its empty skeleton. The next launch re-onboards, exactly as on a fresh
+        download. Keeps a profile.json.bak for safety. Reloads after.
+        """
+        removed = []
+        for path in (SIGNALS_PATH, PATTERNS_PATH, DB_PATH, DB_PATH + "-journal"):
+            try:
+                if os.path.exists(path):
+                    os.remove(path)
+                    removed.append(os.path.basename(path))
+            except OSError as e:
+                return False, f"could not remove {os.path.basename(path)}: {e}"
+        self.reset_profile()
+        self.load()
+        return True, "cleared " + (", ".join(removed) if removed else "nothing") \
+            + " + reset profile.json"
 
     # ---- phases 2-3: agentic (the documented quarantine exception) ----
     def analyze_phase(self, cancel=None, on_line=None) -> tuple[bool, str]:

@@ -110,6 +110,10 @@ class JigsmithCommands(Provider):
             ("Shell list",
              "Choose which shells' command history the mirror mines",
              app.open_inspect_shells_picker),
+            ("Clear data",
+             "Reset to fresh-clone state — wipe all mined data + settings "
+             "(signals, patterns, rack, profile)",
+             app.open_clear_data),
             # keys + theme always go last (see COMMANDS — single provider so this
             # insertion order is the displayed order)
             ("Keys",
@@ -299,6 +303,43 @@ class JigsmithApp(App):
 
         self.push_screen(DefaultAgentModal(), done)
 
+    def open_clear_data(self) -> None:
+        """Confirm, then reset the workspace to fresh-clone state."""
+        from tui.screens.config import ConfirmModal
+
+        def done(confirmed) -> None:
+            if confirmed:
+                self._clear_data()
+
+        self.push_screen(
+            ConfirmModal(
+                "Clear all data?",
+                "Deletes mined data (signals, patterns), the jig rack + saved "
+                "settings, and blanks the Profile — back to a fresh clone. A "
+                "profile.json.bak is kept. This cannot be undone.",
+            ),
+            done,
+        )
+
+    def _clear_data(self) -> None:
+        ok, msg = self.store.reset_workspace()
+        if not ok:
+            self.notify(f"clear failed: {msg}", severity="error", timeout=5)
+            return
+        # Recreate the empty rack + settings tables so the running app doesn't
+        # error before the next launch re-onboards.
+        db.init()
+        settings.init()
+        # Re-read the blanked Profile spec and re-render the surfaces in place.
+        self.sections = load_profile()
+        try:
+            self.query_one("#profile", ProfileScreen).update_sections(self.sections)
+            self.query_one("#forge", ForgeScreen).load()
+            self._rescan_workbench()
+        except Exception:
+            pass
+        self.notify("Workspace cleared — run the scanner (r) to rebuild", timeout=4)
+
     def _apply_inspect(self, ids: list[str]) -> None:
         """Persist the agents-to-inspect set + refresh."""
         settings.set_inspect_agents(ids)
@@ -379,10 +420,11 @@ class JigsmithApp(App):
             self.theme = saved
         # first run → onboarding wizard (default agent → agents to inspect), then
         # the launcher; otherwise straight to the launcher.
+        # Home is the backdrop in both cases — the onboarding modals sit over it,
+        # not over the Fingerprint shell.
+        self.push_screen(HomeScreen())
         if self._needs_onboarding():
             self._onboard()
-        else:
-            self.push_screen(HomeScreen())
 
     # ---- onboarding (first run) ----
     def _needs_onboarding(self) -> bool:
@@ -400,7 +442,8 @@ class JigsmithApp(App):
         from tui.screens.config import DefaultAgentModal, InspectModal, ShellModal
 
         def finish() -> None:
-            self.push_screen(HomeScreen())
+            # Home is already the backdrop (pushed in on_mount); the last modal
+            # just dismissed back onto it — nothing to push.
             self.notify("Setup done — press r on the Fingerprint to mine your history",
                         timeout=6)
 

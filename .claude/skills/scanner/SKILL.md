@@ -40,7 +40,7 @@ focused analyst — spawn one subagent per section (parallel) or work them in tu
 that reads ONLY:
 
 - that section's slice of `signals.json` (the `signals` key in the registry), and
-- that section's **rubric** (`knowledge/<section>.md`) — the curated, master-tended
+- that section's **rubric** (`knowledge/<section>.md`) — the curated, dev-tended
   best-practice for that lens (MCP hygiene, context engineering, etc.). The rubric
   is how you stay current without guessing; if it's thin, say so and lean on the
   data. You may consult the live web for current best practice and propose rubric
@@ -132,7 +132,7 @@ terms), **fix** (the proposal), **gate** (the discipline / scoring).
   "frequency": "git ×38 over 15 active days (~2.5/day); bursty around commits",
   "evidence": "shell verb git ×38 (commit 22, clone 9); lazygit installed, 0 uses; 94% run during a live session = hand-driven.",
 
-  // — fix: the proposal (the master confirms `approach` at forge time) —
+  // — fix: the proposal (the dev confirms `approach` at forge time) —
   "fix": {
     "approach": "download",       // custom | download | manual
     "tool_type": "CLI",           // one, or "+"-joined: memory | skill | hook | agent config | script | CLI | TUI | alias
@@ -152,7 +152,7 @@ terms), **fix** (the proposal), **gate** (the discipline / scoring).
 }
 ```
 
-`fix.approach`: the **one axis** the forge agent confirms with the master —
+`fix.approach`: the **one axis** the forge agent confirms with the dev —
 **custom** (build a new jig), **download** (adopt an existing tool), or **manual**
 (a habit/config change, nothing to build). The dev may override (e.g. fix says
 download but they prefer custom); that's the confirmation step, not a failure.
@@ -265,4 +265,4 @@ duplicate them. The TUI then reads only the spec (quarantine).
 - Surface the ranked list. For **forge** candidates that clear payback, offer
   `forge-jig`. For **dispose**, offer `dispose-jig`. For **suggest**, just report.
 - Add strong forge candidates to the rack as `status="candidate"` (see `forge-jig`).
-- **Do not auto-build or auto-delete.** The master decides.
+- **Do not auto-build or auto-delete.** The dev decides.

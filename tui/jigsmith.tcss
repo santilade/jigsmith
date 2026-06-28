@@ -75,7 +75,9 @@ ScopePane {
 
 /* agent-picker modals */
 InspectModal,
-DefaultAgentModal {
+ShellModal,
+DefaultAgentModal,
+ConfirmModal {
     align: center middle;
 }
 

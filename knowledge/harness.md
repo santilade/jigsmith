@@ -15,7 +15,7 @@ invoked. The home of **dispose** candidates.
 - **"Unused" is window-bounded.** A skill used once a quarter looks dead in a 30-day
   mine. Before proposing dispose, weigh: is it dead, or rare-but-load-bearing
   (incident response, release ritual)? Report install + use-count; recommend, don't
-  condemn. The master confirms.
+  condemn. The dev confirms.
 - MCP clutter is the highest-value find — each dead server also bloats Context every
   turn (cross-ref). Disposing it wins twice.
 

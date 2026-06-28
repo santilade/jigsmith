@@ -5,8 +5,8 @@ description: The propose → feedback → adjust loop for changing the Jigsmith 
 
 # Tend the workbench
 
-A workbench is **tended**, never silently configured. The developer is the
-master and owns the bench. Your job is to keep the picture legible and propose
+A workbench is **tended**, never silently configured. The developer owns the
+bench. Your job is to keep the picture legible and propose
 improvements — not to rearrange behind their back.
 
 ## When this applies
@@ -25,7 +25,7 @@ Forging *new* jigs/panels on request does **not** need this dance — just build
    Profile, a pattern, a payback number). No data, no reshape.
 2. **Propose** — describe the change and its cost/benefit concretely. Show a
    before/after if it's visual.
-3. **Feedback** — ask. Let the master accept, tweak, or reject. Readability and
+3. **Feedback** — ask. Let the dev accept, tweak, or reject. Readability and
    usefulness are theirs to judge.
 4. **Adjust** — apply only what's agreed. Record what changed.
 

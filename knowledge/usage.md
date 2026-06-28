@@ -1,7 +1,7 @@
 # Rubric — Usage
 
 The what/when/how-much lens. Mostly descriptive; few forge candidates come from
-here, but it frames everything else. Master-tended — update as your read sharpens.
+here, but it frames everything else. Dev-tended — update as your read sharpens.
 
 ## Read for
 - **Cross-agent split (`by_agent`).** Which agent for which job? Deep multi-tool

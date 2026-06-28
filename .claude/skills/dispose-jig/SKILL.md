@@ -39,7 +39,7 @@ normal maintenance, not failure.
 
 ## Rules
 
-- Ask first — never delete the master's work unprompted (`tend-workbench`).
+- Ask first — never delete the dev's work unprompted (`tend-workbench`).
 - Prefer *retire* when unsure; it keeps the history without the clutter.
 - Removing a forged component type: delete `tui/panels/forged/<name>.py` and any
   `profile.json` box that uses `"component": "<name>"` so nothing dangles.

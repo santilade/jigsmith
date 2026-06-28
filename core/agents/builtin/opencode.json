@@ -7,7 +7,7 @@
     "headless": ["opencode", "run", "--dangerously-skip-permissions", "{prompt}"],
     "headless_stream": ["opencode", "run", "--dangerously-skip-permissions", "--format", "json", "{prompt}"],
     "stream_format": "opencode-json",
-    "interactive": ["opencode"]
+    "interactive": ["opencode", "--prompt", "{prompt}"]
   },
   "inspect": {
     "history": {"glob": "~/.local/share/opencode/opencode.db", "format": "opencode-db"},

@@ -23,7 +23,7 @@ Profile is the mirror; the Forge tab owns these candidates.
   sections.
 - Add strong `forge` candidates to the rack as `status="candidate"`; `dispose`
   candidates point at existing rack rows / installed config.
-- **Never auto-build or auto-delete.** The rollup *recommends*; the master acts
+- **Never auto-build or auto-delete.** The rollup *recommends*; the dev acts
   (`forge-jig` / `dispose-jig`).
 
 ## The gate (Jigsmith's core bet)

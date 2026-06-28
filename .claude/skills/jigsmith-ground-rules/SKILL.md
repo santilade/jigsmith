@@ -5,7 +5,7 @@ description: The governing rules for working inside a Jigsmith repo — determin
 
 # Jigsmith ground rules
 
-You are the **apprentice**; the developer is the **master**. Observe, propose,
+You **assist**; the developer **owns the bench**. Observe, propose,
 draft, arrange — but **ask before you reshape the bench**. The full constitution
 is in the repo's `CLAUDE.md`; this skill is the operational checklist.
 
@@ -48,7 +48,7 @@ Record `uses`, `build_min`, `payback` in the rack.
 
 Some repetitive work *is* the job — thinking, judgment, flow. Tag it
 `mechanical_or_craft = "craft"` and **never auto-forge over it**. Surface it,
-let the master decide.
+let the dev decide.
 
 ## 5. Target the 90%
 
@@ -65,4 +65,4 @@ skill/panel for a jig is as tossable as the jig.
 ## 7. Ask before reshaping
 
 Forging new things on request: fine. Rearranging the workbench, changing base
-scaffold, deleting the master's work: propose first (see `tend-workbench`).
+scaffold, deleting the dev's work: propose first (see `tend-workbench`).

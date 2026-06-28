@@ -31,14 +31,14 @@ The principles behind the rules below:
   It is to make the developer **more conscious** of their own workflow, so
   painpoints are easy to see and act on. Consciousness over convenience.
 
-The **master/apprentice rule** and **disposability** sections below are the other
+The **dev-owns-the-bench rule** and **disposability** sections below are the other
 two pillars.
 
-## The master/apprentice rule
+## The dev-owns-the-bench rule
 
-The **developer is the master**; the agent is the **apprentice**. The dev owns the
+The **developer owns the bench**; the agent assists. The dev owns the
 workbench and has final say. You may observe, propose, draft, and arrange — but
-**ask before you reshape the bench**. Readability and usefulness are the master's
+**ask before you reshape the bench**. Readability and usefulness are the dev's
 to judge. A workbench is *tended*, never silently *configured*.
 
 ## The one ground rule: deterministic vs agentic
@@ -60,7 +60,7 @@ emits `signals.json`; the `scanner` analyze phase (agentic) reads it and emits
 `patterns.json`; `build-profile` (agentic) emits `profile.json`; the TUI
 (deterministic) reads only the spec.
 
-**Documented exception (master's call).** The `r` key / "Run scanner" runs
+**Documented exception (the dev's call).** The `r` key / "Run scanner" runs
 the *full* pipeline. Phase 1 (`core.mine.run()`) is deterministic and runs
 **in-process**. Phases 2-3 shell out to the default agent via `core.run.headless`
 (`DataStore.analyze_phase` / `report_phase`) — deterministic code invoking the
@@ -69,7 +69,7 @@ runs as a one-shot that writes `patterns.json` + `profile.json` to disk, and the
 then only *reads* that result. Never per-frame, never implicit. The Forge hand-off
 (`launch_interactive`) is the same kind of sanctioned crossing. A phase-1-only
 refresh stays in the palette for when you don't want the agent. Everywhere else the
-boundary holds — do not widen it without the master.
+boundary holds — do not widen it without the dev.
 
 ## Multi-agent: agents are data, formats are code
 
@@ -92,7 +92,7 @@ Optimize for **volume and cumulative cost**, not per-instance pain. Two discipli
 The **`inventory ⋈ usage` join** is the engine of recommendations: what's installed
 joined against what's used surfaces *dispose* candidates (installed + unused) and
 *forge* candidates (used + no tool). "Unused" is window-bounded — recommend, the
-master confirms.
+dev confirms.
 
 ## Disposability
 

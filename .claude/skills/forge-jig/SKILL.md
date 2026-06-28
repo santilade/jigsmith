@@ -10,7 +10,7 @@ script, agent config, TUI, or CLI. Forging means: understand the problem, scope
 the tool *with* the developer, build it, then record it in the rack so its
 payback and disposability stay visible.
 
-The developer is the master; you are the apprentice. **Forging is human-driven —
+The developer owns the bench; you assist. **Forging is human-driven —
 you do not auto-build.** Define the tool together, get a go-ahead, then build.
 
 ## Phase 0 — understand & scope (do this first, before any build)
@@ -28,7 +28,7 @@ A candidate carries three bands: **narrative** (`name`, `painpoint`, `frequency`
    judgment, or flow. Confirm **payback**: frequency × per-instance cost must beat
    build + upkeep. If it's craft, or payback doesn't clear, **say so and stop** —
    tooling busywork is the anti-goal.
-3. **Confirm the fix with the master.** The candidate's `fix.approach`
+3. **Confirm the fix with the dev.** The candidate's `fix.approach`
    (custom / download / manual) and `fix.tool_type` are a *proposal*, not a
    decision. The developer may prefer a custom jig over a suggested download (or
    the reverse, or a plain manual change). Surface the suggested fix — `what`,
