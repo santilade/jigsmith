@@ -38,4 +38,5 @@ def parse_agent(manifest) -> list[Event]:
 
 
 # import the built-in parsers so they self-register
-from core.parsers import claude_jsonl, openai_jsonl, opencode_store  # noqa: E402,F401
+from core.parsers import (claude_jsonl, openai_jsonl,  # noqa: E402,F401
+                          opencode_db, opencode_store)

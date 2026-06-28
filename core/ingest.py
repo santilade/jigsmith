@@ -7,7 +7,7 @@ from __future__ import annotations
 from core import agents
 from core.events import Event, ShellCmd
 from core.parsers import parse_agent
-from core.parsers.shell_history import SHELLS, parse_shell
+from core.parsers.shell_history import SHELLS, default_shells, parse_shell
 
 
 def ingest_events(agent_ids: list[str] | None = None) -> list[Event]:
@@ -27,7 +27,7 @@ def ingest_shells(shell_ids: list[str] | None = None) -> dict:
     """ShellCmd streams keyed by shell id, plus the dominant bulk-ts per shell."""
     from core.store import settings
     if shell_ids is None:
-        shell_ids = settings.inspect_shells() or ["zsh"]
+        shell_ids = settings.inspect_shells() or default_shells()
     out: dict[str, dict] = {}
     for sid in shell_ids:
         path = SHELLS.get(sid)

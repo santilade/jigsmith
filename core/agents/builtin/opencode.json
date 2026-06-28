@@ -10,7 +10,7 @@
     "interactive": ["opencode"]
   },
   "inspect": {
-    "history": {"glob": "~/.local/share/opencode/storage/**/*.json", "format": "opencode-store"},
+    "history": {"glob": "~/.local/share/opencode/opencode.db", "format": "opencode-db"},
     "settings": {
       "config": "~/.config/opencode/opencode.json",
       "mcp": "~/.config/opencode/opencode.json",

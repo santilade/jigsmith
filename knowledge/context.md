@@ -7,6 +7,10 @@ tokens and attention on every turn.
 - **Memory weight (`memory_files`).** Oversized CLAUDE.md / AGENTS.md load on every
   turn. Flag the largest; ask whether all of it earns its place. Candidate: split
   rarely-needed sections into on-demand skills.
+  - **Exclude the Jigsmith repo's own scaffold.** Drop any `memory_files` entry whose
+    `scope` is the Jigsmith repo itself (its `CLAUDE.md` / `AGENTS.md`). That's the
+    tool measuring its own constitution, not a workflow signal — it's load-bearing by
+    design and governed by `tend-workbench`, not a Context finding. Never headline it.
 - **Repeated preambles.** The same long setup re-typed across sessions =
   re-explaining → a memory entry or a skill. High-repeat preambles are a clean
   forge candidate (cross-ref Sessions' relaunch tax).

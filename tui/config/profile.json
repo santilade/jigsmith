@@ -315,31 +315,30 @@
       "boxes": [
         {
           "component": "prose",
-          "text": "Your context window carries 17,925 bytes of memory files, with jigsmith's CLAUDE.md alone at 9.8 KB — the heaviest single file. You re-type the same preambles across sessions: the sources.py question 5 times, the pipeline performance target 4 times. Of 5 configured MCP servers, only 1 (gitnexus, called 2 times) was ever exercised — desktop-commander, graphify, mssql, and selenium burn context on every turn doing nothing."
+          "text": "You re-type the same preambles across sessions: the sources.py question 5 times, the pipeline performance target 4 times — explanations the agent re-derives from scratch each time because they live nowhere it can recall. Of 5 configured MCP servers, only 1 (gitnexus, called 2 times) was ever exercised — desktop-commander, graphify, mssql, and selenium burn context on every turn doing nothing. Your project memory files total ~8 KB, led by contract-management's CLAUDE.md at 5.3 KB."
         },
         {
           "component": "counters",
           "items": [
-            {"value": "17,925", "label": "Total Memory Bytes"},
-            {"value": "9,859", "label": "Largest File (jigsmith CLAUDE.md)"},
-            {"value": "5", "label": "Memory Files"},
+            {"value": "8,066", "label": "Total Memory Bytes"},
+            {"value": "5,275", "label": "Largest File (contract-mgmt)"},
+            {"value": "4", "label": "Memory Files"},
             {"value": "5", "label": "MCP Servers Configured"},
             {"value": "1", "label": "MCP Servers Exercised"},
             {"value": "4", "label": "MCP Servers Never Called"}
           ],
-          "note": "From signals.context.memory_files and signals.context.mcp_surface — 4 dead MCPs pollute context on every turn"
+          "note": "From signals.context.memory_files and signals.context.mcp_surface — Jigsmith's own scaffold excluded (the tool measuring itself); 4 dead MCPs pollute context on every turn"
         },
         {
           "component": "bars",
           "title": "Memory Files by Size (bytes)",
           "data": [
-            ["jigsmith CLAUDE.md", 9859],
             ["contract-management CLAUDE.md", 5275],
             ["global CLAUDE.md", 1998],
             ["opencode AGENTS.md", 782],
             ["open-design CLAUDE.md", 11]
           ],
-          "note": "From signals.context.memory_files — jigsmith CLAUDE.md at 9.8 KB is the heaviest; total 17,925 bytes loaded across projects"
+          "note": "From signals.context.memory_files — Jigsmith's own CLAUDE.md excluded (load-bearing scaffold, governed by tend-workbench); ~8 KB loaded across project memory files"
         },
         {
           "component": "bars",
@@ -379,18 +378,9 @@
               "payback": "directional — 4 repetitions; thin-N but zero-cost fix",
               "command": "memory",
               "detail": "Record the pipeline performance target and current baseline in CLAUDE.md so every new session starts with the goal."
-            },
-            {
-              "rank": 3,
-              "name": "Jigsmith's own CLAUDE.md is 9.8 KB — heaviest memory file",
-              "kind": "suggest",
-              "frequency": "9,859 bytes loaded per turn in jigsmith sessions; 5,275 bytes in contract-management",
-              "payback": "proven — 9.8 KB x 966 turns = 9.5 MB of repeated context; trimming to 4 KB saves 5.6 MB",
-              "command": "manual",
-              "detail": "Audit the jigsmith CLAUDE.md — split rarely-needed sections into on-demand skills. Keep only the essentials in the always-loaded file."
             }
           ],
-          "verdict": "Repeated preambles are the clearest win — store answers once in CLAUDE.md. The 9.8 KB jigsmith CLAUDE.md is worth trimming."
+          "verdict": "Repeated preambles are the clearest win — store answers once in CLAUDE.md. Also worth disposing the 4 dead MCP servers (see Harness)."
         }
       ]
     },

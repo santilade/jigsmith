@@ -27,6 +27,24 @@ SHELLS = {
     "fish": "~/.local/share/fish/fish_history",
 }
 
+
+def current_shell() -> str | None:
+    """The shell Jigsmith is running under, from $SHELL — or None if unknown."""
+    name = os.path.basename(os.environ.get("SHELL", "")).strip()
+    return name if name in SHELLS else None
+
+
+def has_history(shell_id: str) -> bool:
+    """True when this shell's history file exists on disk."""
+    path = SHELLS.get(shell_id)
+    return bool(path) and os.path.exists(os.path.expanduser(path))
+
+
+def default_shells() -> list[str]:
+    """The inspect set when the developer hasn't chosen: the current shell."""
+    cur = current_shell()
+    return [cur] if cur else ["zsh"]
+
 _ZSH_HEADER = re.compile(r"^: (\d+):\d+;(.*)$", re.S)
 
 

@@ -130,6 +130,12 @@ load-bearing — that's where this developer's workflow shows up.
   lens has none — don't fabricate friction to fill it.
 - Inline values must match `signals.json` (data) and `patterns.json` (painpoints)
   — read, don't guess.
+- **Exclude the Jigsmith repo's own scaffold from the mirror.** When a lens reads
+  files on disk (notably Context's `memory_files`), drop entries whose `scope` is the
+  Jigsmith repo itself — its `CLAUDE.md` / `AGENTS.md` are the tool measuring its own
+  constitution, not the developer's workflow. Don't headline them in prose, counters,
+  or charts, and skip any `patterns.json` painpoint that only flags Jigsmith's own
+  scaffold. Reshaping that scaffold is `tend-workbench`'s job, not a Profile finding.
 - **Two rebuild modes:**
   - *Pipeline* (`r` / Run scanner): `report_phase` blanks `profile.json` to an
     empty skeleton first (prior saved as `.bak`) — build FRESH, nothing to merge.

@@ -107,6 +107,9 @@ class JigsmithCommands(Provider):
             ("Agent list",
              "Choose which agents' history + inventory the mirror mines",
              app.open_inspect_picker),
+            ("Shell list",
+             "Choose which shells' command history the mirror mines",
+             app.open_inspect_shells_picker),
             # keys + theme always go last (see COMMANDS — single provider so this
             # insertion order is the displayed order)
             ("Keys",
@@ -275,6 +278,17 @@ class JigsmithApp(App):
 
         self.push_screen(InspectModal(), done)
 
+    def open_inspect_shells_picker(self) -> None:
+        from tui.screens.config import ShellModal
+
+        def done(ids) -> None:
+            if ids:
+                settings.set_inspect_shells(ids)
+                self.notify("shells to inspect updated — run the miner (r) to refresh",
+                            timeout=3)
+
+        self.push_screen(ShellModal(), done)
+
     def open_default_runner_picker(self) -> None:
         from tui.screens.config import DefaultAgentModal
 
@@ -382,25 +396,31 @@ class JigsmithApp(App):
         Always persists a value at each step (the auto default if the user just
         confirms/cancels) so onboarding completes and never re-fires.
         """
-        from tui.screens.config import DefaultAgentModal, InspectModal
+        from core.parsers.shell_history import default_shells
+        from tui.screens.config import DefaultAgentModal, InspectModal, ShellModal
 
         def finish() -> None:
             self.push_screen(HomeScreen())
             self.notify("Setup done — press r on the Fingerprint to mine your history",
                         timeout=6)
 
+        def after_shells(ids) -> None:
+            settings.set_inspect_shells(ids or default_shells())
+            finish()
+
         def after_inspect(ids) -> None:
             chosen = ids or [m.id for m in agents.inspectable()] or ["claude"]
             settings.set_inspect_agents(chosen)
-            finish()
+            self.notify("Step 3/3 — which shells should Jigsmith inspect?", timeout=4)
+            self.push_screen(ShellModal(), after_shells)
 
         def after_default(aid) -> None:
             default = agents.default()
             settings.set_default_agent(aid or (default.id if default else "claude"))
-            self.notify("Step 2/2 — which agents should Jigsmith inspect?", timeout=4)
+            self.notify("Step 2/3 — which agents should Jigsmith inspect?", timeout=4)
             self.push_screen(InspectModal(), after_inspect)
 
-        self.notify("Welcome to Jigsmith · Step 1/2 — pick your default agent",
+        self.notify("Welcome to Jigsmith · Step 1/3 — pick your default agent",
                     timeout=4)
         self.push_screen(DefaultAgentModal(), after_default)
 
