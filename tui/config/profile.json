@@ -1,5 +1,448 @@
 {
-  "_comment": "Agent-authored Profile spec \u2014 the DYNAMIC content layer. Reset to empty by the report phase; build-profile rewrites it fresh. Prior version saved as profile.json.bak.",
-  "generated": "2026-06-28",
-  "sections": []
+  "_comment": "Agent-authored Profile spec — the DYNAMIC content layer. Built fresh by build-profile from signals.json + patterns.json. Inline values are a snapshot until the next rebuild.",
+  "generated": "2026-06-29",
+  "sections": [
+    {
+      "id": "usage",
+      "title": "Usage",
+      "boxes": [
+        {
+          "component": "prose",
+          "text": "40,355 events across 357 sessions, 41 projects, Apr–Jun 2026 — driven through two agents. Opencode carries more sessions (202 vs 155) but Claude does the heavy lifting: 32,047 of the events. The model split is the tell — Claude is one-speed (opus-4-8 x12,803), while opencode routes freely to local Qwen, so the downshift habit exists on one agent and not the other."
+        },
+        {
+          "component": "counters",
+          "items": [
+            {"value": "357", "label": "sessions", "note": "total agent sessions in window"},
+            {"value": "40,355", "label": "events", "note": "all normalized events across both agents"},
+            {"value": "41", "label": "projects", "note": "distinct project dirs touched"},
+            {"value": "2", "label": "agents", "note": "claude + opencode inspected", "hot": true},
+            {"value": "8,686", "label": "user msgs", "note": "17,775 assistant msgs in reply"}
+          ]
+        },
+        {
+          "row": [
+            {
+              "component": "bars",
+              "title": "Sessions by agent",
+              "data": [["opencode", 202], ["claude", 155]],
+              "note": "Opencode runs more sessions; Claude runs longer ones — 32,047 events vs 8,308.",
+              "label_w": 10
+            },
+            {
+              "component": "bars",
+              "title": "Events by agent",
+              "data": [["claude", 32047], ["opencode", 8308]],
+              "note": "Claude is where the per-turn work lands despite fewer sessions.",
+              "label_w": 10
+            }
+          ]
+        },
+        {
+          "component": "bars",
+          "title": "Model usage (calls)",
+          "data": [["claude-opus-4-8", 12803], ["Qwen3.5-122B-A10B", 1360], ["claude-fable-5", 1201], ["Qwen3.6-35B-A3B", 1091], ["qwen3-coder-next", 978], ["claude-opus-4-7", 85], ["claude-sonnet-4-6", 80]],
+          "note": "Opus dominates the Claude side; fable-5 (x1,201) and sonnet-4-6 (x80) barely register. The Qwen tiers are opencode's local routing — proof the downshift reflex works, just not on Claude.",
+          "label_w": 20
+        },
+        {
+          "component": "bars",
+          "title": "Top projects by sessions",
+          "data": [["route-opt-cuopt", 85], ["contract-management", 61], ["ai-code-review", 37], ["santilade", 33], ["jigsmith", 26], ["ai-coding-snippets", 21], ["QA", 21]],
+          "note": "route-optimization-nvidia-cuopt is the center of gravity (85 sessions); the long tail of 41 projects is mostly one-offs.",
+          "label_w": 20
+        },
+        {
+          "component": "blocks",
+          "title": "Painpoints",
+          "items": [
+            {
+              "name": "Opus runs every Claude task, downshift gear untouched",
+              "kind": "suggest",
+              "command": "memory",
+              "frequency": "claude-opus-4-8 x12,803 vs fable-5 x1,201 / sonnet-4-6 x80; /model switched only 9x and /effort 3x across 357 sessions.",
+              "payback": "directional — can't see per-call difficulty from usage alone, but the routing-cadence gap is stark; try a week of deliberate downshifting",
+              "detail": "Make downshifting a conscious default for mechanical Claude work instead of leaving it all on Opus."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sessions",
+      "title": "Sessions & orchestration",
+      "boxes": [
+        {
+          "component": "prose",
+          "text": "127 active hours, and nearly half of them (48.1%, 61.2h) are spent watching the agent run. 167 of 357 sessions overlap with another at some point (max concurrency 4), and 317 sit inside a chain — long pushes fragment into back-to-back relaunches rather than one continued thread. The gap histogram peaks at overlap and sub-5-minute resets: the relaunch tax is real."
+        },
+        {
+          "component": "counters",
+          "items": [
+            {"value": "127.2h", "label": "active", "note": "total active wall-time in window"},
+            {"value": "48.1%", "label": "spent waiting", "note": "active wall-time idle on the agent — the single biggest lever", "hot": true},
+            {"value": "61.2h", "label": "babysitting", "note": "total wait hours watching turns finish"},
+            {"value": "4", "label": "max concurrency", "note": "peak simultaneous sessions (metrics + route-opt)"},
+            {"value": "317", "label": "in a chain", "note": "of 357 sessions; only 40 standalone"}
+          ]
+        },
+        {
+          "component": "bars",
+          "title": "Wait hours by project",
+          "data": [["route-opt-cuopt", 25.08], ["ai-code-review", 9.43], ["metrics", 8.05], ["contract-management", 3.12], ["jigsmith", 2.51], ["route-optimization", 2.41]],
+          "note": "route-optimization-nvidia-cuopt alone is 25.1h of wait over 488 turns (mean 185s/turn). The slow-feedback projects (CUDA build / CI / heavy tests) carry the babysitting.",
+          "label_w": 20
+        },
+        {
+          "component": "histogram",
+          "title": "Gap between consecutive sessions",
+          "data": [89, 93, 55, 20, 26, 28, 45],
+          "labels": ["overlap", "0-5m", "5-15m", "15-30m", "30-60m", "1-3h", ">3h"],
+          "note": "89 overlaps + 93 sub-5-minute gaps dominate — long efforts chopped into fresh-context relaunches, each re-explaining setup. The 2026-06-28 chain was 18 jigsmith sessions in 77.5 min."
+        },
+        {
+          "row": [
+            {
+              "component": "counters",
+              "items": [
+                {"value": "40.9s", "label": "median wait", "note": "per-turn median over 1,414 measured turns"},
+                {"value": "155.8s", "label": "mean wait", "note": "p90 = 421s; max capped at 1,800s"}
+              ]
+            },
+            {
+              "component": "counters",
+              "items": [
+                {"value": "72", "label": "project switches", "note": "chain handoffs that switch project (vs 185 same)"},
+                {"value": "46", "label": "cross-project overlaps", "note": "ai-code-review ⟷ route-opt ⟷ confluence juggling"}
+              ]
+            }
+          ]
+        },
+        {
+          "component": "blocks",
+          "title": "Painpoints",
+          "items": [
+            {
+              "name": "Half your active wall-time is spent watching the agent run",
+              "kind": "suggest",
+              "command": "script",
+              "frequency": "61.2h total wait over 127h active (48.1% of active wall-time); p90 turn = 421s, mean 155.8s across 1,414 turns; route-optimization alone = 25.1h wait / 488 turns.",
+              "payback": "strong directional — 48% idle wall-time is the largest single lever in the whole rollup; scope the slowest 3 projects first",
+              "detail": "Shrink the feedback loop on slow projects: background long-runners, swap full builds for scoped incremental checks."
+            },
+            {
+              "name": "Cross-project juggling pays a re-context tax on every switch",
+              "kind": "suggest",
+              "command": "skill",
+              "frequency": "46 cross-project overlap episodes; 72 chain handoffs that switch project (vs 185 same); 27,398s cross-project overlapped wall.",
+              "payback": "directional — 72 switch-handoffs; per-project loader pays back if juggling continues",
+              "detail": "Give each frequently-juggled repo a one-shot launch/context jig so a switch costs seconds, not a re-onboarding."
+            },
+            {
+              "name": "One effort chopped into a flurry of fresh-context relaunches",
+              "kind": "suggest",
+              "command": "memory",
+              "frequency": "317 of 357 sessions in a chain; gap buckets 0-5min x93 and overlap(<0) x89 dominate; 2026-06-28 = 18 sessions / 77.5 min on jigsmith.",
+              "payback": "directional — 93 sub-5-min relaunches; one memory file removes the re-onboarding on each",
+              "detail": "Stabilize a project memory / CLAUDE.md so a relaunch inherits setup instead of re-explaining it."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "loop",
+      "title": "Loop",
+      "boxes": [
+        {
+          "component": "prose",
+          "text": "1,529 turns, 10,542 tool calls — median 2 per turn but a long tail to 138. The grammar is maker-heavy: edit→edit (x1,319) chains changes with no check between, and verify-after-change (692) runs roughly once per four changes (2,961 edits+writes). Delegation is rare — only 44 turns fan out — so the longest turns (138/137/128 calls) grind independent work through one serial thread."
+        },
+        {
+          "component": "counters",
+          "items": [
+            {"value": "1,529", "label": "turns", "note": "1,044 used tools; 485 chat-only"},
+            {"value": "10,542", "label": "tool calls", "note": "mean 6.9/turn, p90 19, median 2"},
+            {"value": "138", "label": "longest turn", "note": "tool calls in a single autonomous turn, 0 subagents", "hot": true},
+            {"value": "692", "label": "verify-after-change", "note": "~1 check per 4 changes — the checker rarely fires"},
+            {"value": "44", "label": "delegation turns", "note": "of 1,044 tool turns; 68 subagent calls total"}
+          ]
+        },
+        {
+          "component": "histogram",
+          "title": "Tool-calls per turn (leash)",
+          "data": [485, 490, 234, 171, 149],
+          "labels": ["1", "2-4", "5-9", "10-19", "20+"],
+          "note": "149 turns run 20+ tool calls on a long leash — the autonomous marathons where comprehension debt accrues. Most turns stay short, but the heavy tail is where the unverified shipping happens."
+        },
+        {
+          "row": [
+            {
+              "component": "bars",
+              "title": "Tool kinds (totals)",
+              "data": [["bash", 3633], ["read", 2546], ["edit", 2405], ["mcp", 567], ["write", 556], ["search", 284]],
+              "note": "Maker tools (edit 2,405 + write 556) outweigh bash-as-verify; read 2,546 confirms heavy exploration.",
+              "label_w": 8
+            },
+            {
+              "component": "bars",
+              "title": "Top transitions",
+              "data": [["bash→bash", 2031], ["edit→edit", 1319], ["read→read", 1272], ["read→edit", 569], ["edit→bash", 547]],
+              "note": "edit→edit (1,319) is change-on-change with no check between; edit→bash (547) is the verify that does happen.",
+              "label_w": 11
+            }
+          ]
+        },
+        {
+          "component": "blocks",
+          "title": "Painpoints",
+          "items": [
+            {
+              "name": "The loop edits 4x more than it checks",
+              "kind": "forge",
+              "command": "hook",
+              "frequency": "verify-after-change 692 vs ~2,961 change ops (2,405 edits + 556 writes) ≈ 1 verify per 4 changes; across 1,044 tool-using turns.",
+              "payback": "high — fires on ~2,961 change ops; catches breakage the loop currently ships unverified, against a one-time hook setup",
+              "detail": "Add a PostToolUse verify hook on Edit/Write so the loop self-checks instead of you eyeballing every diff."
+            },
+            {
+              "name": "Marathon serial turns and hand-coordinated session swarms instead of a sub-agent harness",
+              "kind": "forge",
+              "command": "skill",
+              "frequency": "149 turns in the 20+ tool-call bucket; top-10 longest avg ~100 tool calls with 0-1 sub-agents; delegation in only 44 of 1,044 turns; 71 same-project overlap episodes.",
+              "payback": "directional — only the independent slices parallelize, but it covers two lenses' worth of frequency (149 long turns + 71 swarm episodes) and the engine is built-in",
+              "detail": "A thin delegation skill that triggers built-in subagents/Workflows to fan independent work out of long serial turns and same-project swarms."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "context",
+      "title": "Context",
+      "boxes": [
+        {
+          "component": "prose",
+          "text": "Context weight is light — about 8KB of memory across four files (your own repo's scaffold excluded). The friction is elsewhere: 5 MCP servers are configured but only 4 ever fire, so graphify pays a schema tax on every turn it's never used. And standing instructions get re-typed as long preambles — the scanner and build-profile invocations repeat 5 and 4 times, boilerplate that belongs inside the skill."
+        },
+        {
+          "component": "counters",
+          "items": [
+            {"value": "4", "label": "memory files", "note": "excludes Jigsmith's own CLAUDE.md (the tool measuring itself)"},
+            {"value": "8,066", "label": "memory bytes", "note": "modest footprint; contract-management's CLAUDE.md is the bulk"},
+            {"value": "5", "label": "MCP configured", "note": "servers wired into config across agents"},
+            {"value": "4", "label": "MCP exercised", "note": "graphify never called — taxes context every turn", "hot": true}
+          ]
+        },
+        {
+          "component": "bars",
+          "title": "Memory files by size (bytes)",
+          "data": [["contract-mgmt CLAUDE.md", 5275], ["global CLAUDE.md", 1998], ["global AGENTS.md", 782], ["open-design CLAUDE.md", 11]],
+          "note": "Per-project + global memory only; the Jigsmith repo's own 10.4KB CLAUDE.md is dropped — it's the tool's constitution, not your workflow weight.",
+          "label_w": 24
+        },
+        {
+          "component": "bars",
+          "title": "Repeated preambles (repeats)",
+          "data": [["explain complicated sources", 5], ["scanner ANALYZE invocation", 5], ["generate mock .xlsx", 4], ["observability presentation", 4], ["build-profile invocation", 4], ["pipeline took 24 min", 4]],
+          "note": "Standing instructions re-entered into the window each run. The scanner/build-profile preambles are fixed skill behavior that should live in the skill, not the prompt.",
+          "label_w": 26
+        },
+        {
+          "component": "blocks",
+          "title": "Painpoints",
+          "items": [
+            {
+              "name": "Long standing instructions re-typed to invoke Jigsmith skills",
+              "kind": "suggest",
+              "command": "skill",
+              "frequency": "scanner-ANALYZE preamble x5, build-profile preamble x4 (9 combined repeats).",
+              "payback": "directional — 9 combined repeats of avoidable boilerplate; trims the window each run, near-zero cost since the skills already exist",
+              "detail": "Bake the standing 'don't re-run the miner / read these files' instructions into the skills so invocation shrinks to a slash call."
+            },
+            {
+              "name": "Re-typed 'generate a mock .xlsx' setup every time",
+              "kind": "forge",
+              "command": "skill",
+              "frequency": "the 'Use the desktop-commander mcp to generate a .xlsx file with generated mock data' preamble x4.",
+              "payback": "directional — 4 repeats so far; worth it if mock-data generation keeps recurring",
+              "detail": "Forge a 'mock-xlsx' skill that takes columns/rows and emits the file from a column spec."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "harness",
+      "title": "Harness",
+      "boxes": [
+        {
+          "component": "prose",
+          "text": "The rig is lean and mostly live: 1 skill, 1 agent, 5 MCP servers installed, and nearly everything gets used. The two exceptions read as dead config — the graphify MCP (0 calls, but pays rent every turn) and the Architect subagent (0 dispatches). MCP traffic is dominated by selenium (239) and mssql (203); subagent work runs almost entirely through Explore (52)."
+        },
+        {
+          "component": "counters",
+          "items": [
+            {"value": "1 / 1", "label": "skills used", "note": "installed / used — no dead skills"},
+            {"value": "4 / 5", "label": "MCP exercised", "note": "graphify is the one never-called server", "hot": true},
+            {"value": "0 / 1", "label": "agents used", "note": "Architect installed but never dispatched"},
+            {"value": "19", "label": "project config items", "note": "across 5 projects with config"}
+          ]
+        },
+        {
+          "component": "bars",
+          "title": "MCP servers by usage",
+          "data": [["selenium", 239], ["mssql", 203], ["desktop-commander", 55], ["gitnexus", 44], ["mcp-atlassian", 26]],
+          "note": "Four of five servers fire constantly; graphify (0) is absent — it's the non-code graph tool, distinct from gitnexus (44) which you do use here.",
+          "label_w": 18
+        },
+        {
+          "row": [
+            {
+              "component": "bars",
+              "title": "Skills invoked",
+              "data": [["build-profile", 5], ["gitnexus-guide", 2], ["textual-tui", 2], ["scanner", 1], ["tend-workbench", 1]],
+              "note": "build-profile leads — the dogfood loop. Most skills are one-off invocations.",
+              "label_w": 16
+            },
+            {
+              "component": "bars",
+              "title": "Subagents dispatched",
+              "data": [["Explore", 52], ["general-purpose", 6], ["Research tasks", 3], ["wiki tasks", 3]],
+              "note": "Explore carries the real subagent load; Architect (the installed config) never appears.",
+              "label_w": 16
+            }
+          ]
+        },
+        {
+          "component": "blocks",
+          "title": "Painpoints",
+          "items": [
+            {
+              "name": "graphify MCP server loads every turn, never called",
+              "kind": "dispose",
+              "command": "agent config",
+              "frequency": "0 invocations across the whole mined window; the other servers fire constantly (selenium x239, mssql x203, desktop-commander x55, gitnexus x44, mcp-atlassian x26).",
+              "payback": "immediate — every turn of every session stops paying graphify's schema tax; near-zero cost to act, trivially reversible",
+              "detail": "Disable or remove the graphify MCP server from the config that loads it, reclaiming context tokens on every turn."
+            },
+            {
+              "name": "Architect subagent configured but never dispatched",
+              "kind": "dispose",
+              "craft": true,
+              "command": "agent config",
+              "frequency": "0 dispatches in the window; Explore x52 and general-purpose x6 carry the real subagent load.",
+              "payback": "low — leave-alone: craft-flagged design role, cheap to keep; do not forge over it, verify with the dev before retiring",
+              "detail": "Leave Architect in place unless you confirm it isn't your go-to for the occasional system-design session."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shell",
+      "title": "Shell & manual work",
+      "boxes": [
+        {
+          "component": "prose",
+          "text": "4,283 shell entries over 85 active days, only 26.5% during a session — most hand-work happens around the agent, not inside it. The vocabulary is git-first (960), then cd (847) and nvim (465), and the full commands show fixed rituals retyped verbatim: a three-step stage→commit→push, the same long cd paths, source .venv/bin/activate x103, and a long claude_local launch line x32. Plus three installed tools sitting unused."
+        },
+        {
+          "component": "counters",
+          "items": [
+            {"value": "4,283", "label": "shell entries", "note": "over 85 active days; 4,267 reliably timestamped"},
+            {"value": "26.5%", "label": "during session", "note": "the other 73.5% is around/between agent runs"},
+            {"value": "960", "label": "git (verb #1)", "note": "cd 847 (#2), nvim 465 (#3) follow", "hot": true},
+            {"value": "3", "label": "installed unused", "note": "cli, desktop-commander, gcc — window-bounded"}
+          ]
+        },
+        {
+          "component": "bars",
+          "title": "Top verbs",
+          "data": [["git", 960], ["cd", 847], ["nvim", 465], ["la", 250], ["uv", 194], ["claude", 166], ["opencode", 165], ["source", 129]],
+          "note": "Three verbs (git/cd/nvim) account for the bulk of manual work — version control, navigation, and config editing, all candidates for aliases or jump tools.",
+          "label_w": 10
+        },
+        {
+          "row": [
+            {
+              "component": "bars",
+              "title": "git subcommands",
+              "data": [["status", 287], ["commit", 276], ["push", 198], ["add", 145], ["clone", 28]],
+              "note": "add 145 / commit 276 / push 198 cluster as one repeated 3-step sequence, often with throwaway messages ('tweaks' x14).",
+              "label_w": 9
+            },
+            {
+              "component": "bars",
+              "title": "Shell categories",
+              "data": [["version_control", 960], ["navigation", 853], ["editors_open", 465], ["pkg_managers", 257], ["claude_launches", 247]],
+              "note": "Version control and pure navigation lead — both highly mechanical, both collapsible to shortcuts.",
+              "label_w": 16
+            }
+          ]
+        },
+        {
+          "component": "bars",
+          "title": "Most-typed full commands",
+          "data": [["nvim", 340], ["cd", 288], ["git status", 287], ["la", 231], ["git push", 167], ["git add .", 138], ["cd ~/projects/contract-management/", 103], ["source .venv/bin/activate", 103]],
+          "note": "Fixed strings retyped dozens of times each: the same long cd paths, redundant venv activation (uv already drives the env), and the bare git steps — the raw material for aliases and a frecency cd.",
+          "label_w": 34
+        },
+        {
+          "component": "blocks",
+          "title": "Painpoints",
+          "items": [
+            {
+              "name": "Hand-driven stage → commit → push ritual",
+              "kind": "forge",
+              "command": "alias",
+              "frequency": "git add . x138, git commit x276 (e.g. \"tweaks\" x14), git push x198 over 85 active days (~3 commits/day); git is your #1 verb at 960 total.",
+              "payback": "3 cmds × ~3/day × 85 days ≈ 760 saved invocations vs a ~10-min one-line function — pays back in days",
+              "detail": "One `gacp \"msg\"` that runs add . → commit → push, defaulting the message when omitted."
+            },
+            {
+              "name": "Long claude_local launch typed by hand",
+              "kind": "forge",
+              "command": "alias",
+              "frequency": "the full long form x32, plus `claude-local` x55 and verbs claude-local 56 / claude_local 35 — a daily launch ritual.",
+              "payback": "~32+ retypes of a long fixed string vs a 1-line alias — trivially positive",
+              "detail": "Bake the --url and --model into a single `qwen` alias (or fold into the existing claude-local wrapper)."
+            },
+            {
+              "name": "Hand-editing the same config files",
+              "kind": "forge",
+              "command": "alias",
+              "frequency": "`nvim ~/.bashrc` x50, `nvim ~/.config/opencode/opencode.json` x44 (nvim is verb #3 at 465); `source ~/.bashrc` x25 follows the bashrc edits.",
+              "payback": "~94 full-path retypes + 25 reloads vs two one-line aliases — positive within weeks",
+              "detail": "Add `brc` (edit+reload bashrc) and `ocfg` (edit opencode.json) aliases."
+            },
+            {
+              "name": "Repeated cd into the same project dirs",
+              "kind": "suggest",
+              "command": "CLI",
+              "frequency": "navigation x853 (cd is verb #2 at 847); `cd ~/projects/contract-management/` x103, route-optimization x23, ai-coding-snippets x21, ai-code-review x15, QA x14.",
+              "payback": "directional — 850+ navigations; try zoxide a week, near-zero build cost since it's a download",
+              "detail": "Adopt zoxide so `z contract` jumps to the frecent dir instead of typing the full path."
+            },
+            {
+              "name": "Manual venv activation despite using uv",
+              "kind": "suggest",
+              "command": "alias",
+              "frequency": "`source .venv/bin/activate` x103; source verb x129; uv x194 (uv run pytest, uv sync).",
+              "payback": "directional — 103 activations gone; try `uv run` for a week or wire one .envrc",
+              "detail": "Lean on `uv run ...` (no activate needed) or add direnv to auto-activate on cd into a project."
+            },
+            {
+              "name": "Installed tools sitting unused",
+              "kind": "dispose",
+              "command": "memory",
+              "frequency": "installed_unused x3 of 7 installed: cli, desktop-commander, gcc.",
+              "payback": "low-stakes hygiene; window-bounded, so confirm before removing",
+              "detail": "Review desktop-commander for removal; leave gcc/cli (likely latent toolchain) unless confirmed dead."
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

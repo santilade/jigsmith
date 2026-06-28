@@ -17,15 +17,12 @@ import os
 import shutil
 from datetime import datetime, timezone
 
-from core import run
+from core import scan
 from core.mine import SIGNALS_PATH
 from core.store.db import DB_PATH, REPO_ROOT
 
 PROFILE_PATH = os.path.join(REPO_ROOT, "tui", "config", "profile.json")
 PATTERNS_PATH = os.path.join(REPO_ROOT, "patterns.json")
-PHASE_TIMEOUT = 2400  # hard cap per agent phase; a slow local model's single-shot
-#                       report write alone can run several minutes, so the cap is
-#                       generous — it exists to kill a truly stuck run, not a slow one.
 
 # source name -> absolute path
 SOURCES = {
@@ -33,36 +30,11 @@ SOURCES = {
     "patterns": PATTERNS_PATH,      # scanner analyze phase (agentic)
 }
 
-# The agent runs the per-section fan-out internally (see the scanner /
-# build-profile skills); the store just hands it the two prompts at the explicit
-# Run action. Phase 1 is in-process Python — no agent.
-ANALYZE_PROMPT = (
-    "Run the scanner skill's ANALYZE phase. signals.json is already fresh "
-    "(do NOT re-run the miner). Read sections.json (the section registry) and the "
-    "matching slices of signals.json; fan out one analyst per section to judge "
-    "the 90% patterns, then the recommendations rollup. Surface EVERY painpoint "
-    "each lens sees — not just forge-able ones: dispose candidates and manual / "
-    "no-build habit nudges too. The one bar: every painpoint carries a suggested "
-    "solution (a pure observation with nothing to do is a descriptive finding, not "
-    "a painpoint). Write patterns.json: a ranked list of forge/dispose/suggest "
-    "candidates in the uniform suggestion shape — narrative (name, section, "
-    "painpoint, frequency, evidence), fix {approach, tool_type, summary, what, why, "
-    "where}, and gate {kind, mechanical_or_craft, payback, confidence}. Set "
-    "`section` correctly on each — phase 3 routes painpoints back to their Profile "
-    "lens by it. Don't ask questions; write the file."
-)
-REPORT_PROMPT = (
-    "Run the build-profile skill. Read signals.json, sections.json and "
-    "patterns.json, and write tui/config/profile.json FRESH (it was reset to an "
-    "empty skeleton — build from scratch, do not merge). One Profile section per "
-    "registry lens, composed from the fixed components, every section carrying an "
-    "explicit id. Each section gets its own `prose` text box (placed first), at "
-    "least one data box from signals.json, and — last — a `Painpoints` blocks box "
-    "of that lens's painpoints (filter patterns.json by `section`; skip the box if "
-    "none). Do NOT write a `forge` Profile section; the full board lives on the "
-    "Forge tab. No section may be text-only. Inline values must match the JSON "
-    "exactly. Don't ask questions; write the file."
-)
+# The per-lens fan-out, validation, retry, and rollup assembly are deterministic
+# Python now (`core.scan`); the store just triggers the two agentic phases at the
+# explicit Run action and reloads the result. Phase 1 is in-process Python — no
+# agent. This keeps orchestration on the deterministic side of the line; only the
+# per-lens judgment and the rollup reconciliation cross to the agent.
 
 
 class DataStore:
@@ -137,13 +109,13 @@ class DataStore:
 
     # ---- phases 2-3: agentic (the documented quarantine exception) ----
     def analyze_phase(self, cancel=None, on_line=None) -> tuple[bool, str]:
-        """signals.json -> patterns.json (one headless agent run). Reloads after."""
-        ok, msg = run.headless(ANALYZE_PROMPT, cwd=REPO_ROOT, add_dir=REPO_ROOT,
-                               timeout=PHASE_TIMEOUT, cancel=cancel, on_line=on_line)
+        """signals.json -> patterns.json. Deterministic per-lens fan-out + rollup
+        (`core.scan`); only the per-lens judgment crosses to the agent. Reloads."""
+        ok, msg = scan.analyze(cancel=cancel, on_line=on_line)
         self.load()
         if ok and not self.has("patterns"):
-            return False, "agent finished but patterns.json missing"
-        return (ok, "patterns.json written") if ok else (ok, msg)
+            return False, "analyze finished but patterns.json missing"
+        return ok, msg
 
     def reset_profile(self) -> None:
         """Blank profile.json (keep a .bak) so the report rebuilds from scratch."""
@@ -163,8 +135,7 @@ class DataStore:
             json.dump(skeleton, fh, indent=2)
 
     def report_phase(self, cancel=None, on_line=None) -> tuple[bool, str]:
-        """patterns.json -> tui/config/profile.json (one headless agent run)."""
+        """patterns.json -> tui/config/profile.json. Resets the spec to a blank
+        skeleton, then `core.scan` composes it fresh and structurally validates."""
         self.reset_profile()
-        ok, msg = run.headless(REPORT_PROMPT, cwd=REPO_ROOT, add_dir=REPO_ROOT,
-                               timeout=PHASE_TIMEOUT, cancel=cancel, on_line=on_line)
-        return (ok, "profile.json rebuilt") if ok else (ok, msg)
+        return scan.report(cancel=cancel, on_line=on_line)

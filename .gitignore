@@ -11,6 +11,7 @@ jigsmith.db-journal
 rack.db
 signals.json
 patterns.json
+patterns.d/
 tui/config/profile.json.bak
 
 # user-registered agent/shell manifests live in ~/.config/jigsmith, not here

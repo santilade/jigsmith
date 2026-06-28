@@ -62,14 +62,18 @@ emits `signals.json`; the `scanner` analyze phase (agentic) reads it and emits
 
 **Documented exception (the dev's call).** The `r` key / "Run scanner" runs
 the *full* pipeline. Phase 1 (`core.mine.run()`) is deterministic and runs
-**in-process**. Phases 2-3 shell out to the default agent via `core.run.headless`
-(`DataStore.analyze_phase` / `report_phase`) — deterministic code invoking the
-agent. This is allowed *only here*: gated behind an explicit user action, the agent
-runs as a one-shot that writes `patterns.json` + `profile.json` to disk, and the TUI
-then only *reads* that result. Never per-frame, never implicit. The Forge hand-off
-(`launch_interactive`) is the same kind of sanctioned crossing. A phase-1-only
-refresh stays in the palette for when you don't want the agent. Everywhere else the
-boundary holds — do not widen it without the dev.
+**in-process**. Phases 2-3 are **orchestrated** by deterministic Python
+(`core.scan`, which `DataStore.analyze_phase` / `report_phase` delegate to): it
+loops the registry lenses, runs one analyst per lens in parallel via
+`core.run.headless`, validates + retries each, then folds them with one rollup
+agent — and only the *judgment* (per-lens analysis, rollup dedup/rank/web-check,
+Profile composition) crosses to the agent. The loop, the validation, and the
+final writes stay in Python. This is allowed *only here*: gated behind an explicit
+user action, each agent call is a one-shot that writes to disk, and the TUI then
+only *reads* `patterns.json` + `profile.json`. Never per-frame, never implicit.
+The Forge hand-off (`launch_interactive`) is the same kind of sanctioned crossing.
+A phase-1-only refresh stays in the palette for when you don't want the agent.
+Everywhere else the boundary holds — do not widen it without the dev.
 
 ## Multi-agent: agents are data, formats are code
 
@@ -111,7 +115,10 @@ core/                deterministic engine                                    (ba
   inventory/         read-only probes: configs (harness) + packages (shell)
   signals/           one module per section lens
   store/             deterministic state: db, settings, the jig rack
-  run.py             the sanctioned agent shell-out (analyze/report/forge)
+  run.py             the sanctioned agent shell-out (one headless call)
+  scan/              deterministic phase-2/3 orchestrator: per-lens fan-out,
+                     validation/retry, rollup assembly (shape.py = the contract)
+  sections.py        registry loader (the lenses, in Python)
 sections.json        the section registry (the lenses)                       (base)
 knowledge/           curated best-practice rubrics, one per lens             (yours)
 tui/

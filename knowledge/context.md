@@ -17,13 +17,23 @@ tokens and attention on every turn.
 - **MCP surface (`mcp_surface`).** `configured` ≫ `exercised` = servers whose tool
   schemas load into context every turn but are never called. Dead surface. Candidate:
   disable the never-exercised ones (cross-ref Harness, which owns the inventory side).
+- **Context rot (cross-ref Loop's `loop_control_commands`).** Long sessions
+  accumulate stale turns — superseded plans, dead-end branches, resolved errors —
+  that dilute the signal the model is steering by. Sparse `/clear` ÷ `/compact`
+  relative to long unbroken sessions = rot left to build → the noise crowds the
+  signal until the loop degrades. Candidate: a compaction habit or a checkpoint
+  that resets the window at natural seams. The *signal* lives in Loop; the *cost*
+  (a polluted window every subsequent turn) is a Context finding — name it here.
 
 ## Current best practice (tend this)
-- Smallest sufficient context. Memory files hold *stable* facts, not transient task
-  state. Prefer just-in-time retrieval (a skill that loads detail on demand) over a
-  always-loaded wall of text.
+- Smallest sufficient context — signal over noise. Every token that isn't earning
+  its place is competing with the ones that are; **delete ruthlessly** beats padding.
+- Memory files hold *stable* facts, not transient task state. Prefer just-in-time
+  retrieval (a skill that loads detail on demand) over an always-loaded wall of text.
 - Each enabled MCP server spends a context budget every turn — keep only what you
   actually call.
+- A long session is not a free context window: prune it at seams (`/clear` ÷
+  `/compact`) before rot dilutes the signal.
 
 ## Payback framing
 - Per-instance cost = tokens + attention on *every* turn, so even small bloat has

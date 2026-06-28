@@ -13,9 +13,18 @@ One thing, three phases, always run together:
 | 2. **analyze** | agentic | one analyst per section judges its lens → ranked forge/dispose/suggest candidates | `patterns.json` |
 | 3. **report** | agentic | compose the candidates + findings into the Profile | `tui/config/profile.json` |
 
-**Quarantine intact.** This skill *sequences* the phases; deterministic code never
-calls the agent. Phase 1 writes `signals.json`; phase 2 reads it and writes
-`patterns.json`; phase 3 reads both. Each phase only reads the prior phase's file.
+**Quarantine intact, orchestration deterministic.** `core.scan` (plain Python)
+*sequences* phases 2-3: it loops the registry lenses, runs one analyst per lens in
+parallel, validates + retries each, then folds them with one rollup agent. Only the
+*judgment* crosses to the agent — the loop, the validation, and the writes are
+Python. Phase 1 writes `signals.json`; phase 2 reads it and writes `patterns.json`;
+phase 3 reads both. Each phase only reads the prior phase's file.
+
+**Two ways in.** From the TUI (`r`) the fan-out is `core.scan.analyze()` — you
+arrive as a *single lens analyst*, handed your rubric + signal slice inline, and you
+write only your lens's slice of suggestions. Run interactively (a human invokes this
+skill), you play every role in turn yourself, following the same contract below. The
+uniform shape and the per-lens discipline are identical either way.
 
 **This pipeline is the gate.** Jigsmith's bet is unproven until a real, recurring
 pattern with payback beating build cost falls out of the data. (It already does:
@@ -33,20 +42,23 @@ uv run python -m core      # → signals.json
 `signals.json` is keyed by the sections in `sections.json`. Read it whole, then
 work section by section.
 
-## Phase 2 — analyze (agentic — judgment, one analyst per section)
+## Phase 2 — analyze (agentic judgment, deterministic fan-out)
 
-Read `sections.json` (the registry). For **each non-rollup section**, run a
-focused analyst — spawn one subagent per section (parallel) or work them in turn —
-that reads ONLY:
+`core.scan.analyze()` loops **each non-rollup section** of `sections.json` and runs
+a focused analyst per lens, in parallel (bounded). Each analyst is handed, inlined
+in its prompt, ONLY:
 
 - that section's slice of `signals.json` (the `signals` key in the registry), and
 - that section's **rubric** (`knowledge/<section>.md`) — the curated, dev-tended
   best-practice for that lens (MCP hygiene, context engineering, etc.). The rubric
   is how you stay current without guessing; if it's thin, say so and lean on the
-  data. You may consult the live web for current best practice and propose rubric
-  updates, but never invent trends.
+  data.
 
-Each analyst owns its lens — don't reach into another section's slice.
+Each analyst owns its lens — the slice is all you get, so reaching into another
+lens is impossible by construction. Do **local** source-checks only; the *rollup*
+does the single web pass (don't each hit the network). The orchestrator validates
+your output against the uniform shape and retries once if it's missing or
+malformed — write the file, in shape, or it's redone.
 
 ### The four engineering disciplines (the framing)
 
@@ -168,47 +180,49 @@ of forge *and* dispose candidates. (`fix.approach` and `gate.kind` are related b
 distinct: a `forge` candidate is almost always `approach: custom`, a `dispose` has
 no fix, and a `suggest` can be `download` or `manual`.)
 
-### Source check — does a tool already exist? (sets `fix.approach`, BEFORE `fix.tool_type`)
+### Source check — does a fix already exist? (painpoint FIRST, type LAST)
 
-Decide `fix.approach` **before** `fix.tool_type`: whether something off-the-shelf
-already solves the pattern dictates the *form* the fix takes. A found tool brings its
-own form (lazygit is a CLI); only when nothing exists do you pick a form to build.
-Don't make every analyst hit the network — three tiers, stop at the first that fires:
+Decide in this order, and **never let the form pre-filter the search**: first hunt
+for anything that already addresses the *painpoint*, whatever shape it takes; only if
+nothing fits do you commit to building; and only *then* do you pick a form. The old
+trap was deciding "this is a skill/memory thing → custom" up front, which stops a
+skill-shaped friction from ever being matched against a skill that already exists.
 
-1. **Local join — per analyst, no web.** If the package inventory shows a known tool
-   **installed-but-idle** for this pattern (the `lazygit ×0 while git ×38` case),
-   that's the match — the strongest signal is a tool already on disk. Set
-   `fix.approach: download`, `fix.what` = that tool, `fix.tool_type` = its form.
-   Done; skip the table.
-2. **Inherently fitted → custom/manual, no web.** If the friction is the agent
-   needing a remembered fact, a procedure to follow, an event-triggered action, or a
-   shortcut for *your own* verbose command, nothing downloadable fits this bench. Set
-   `fix.approach: custom` (or `manual` for a pure habit/config change), then pick the
-   form from the table below. Only patterns that could plausibly be a standalone
-   **CLI / TUI / sub-agent** are download-eligible and reach tier 3.
-3. **Web pass — over the deduped list (in the rollup).** One agent, one web pass, no
-   N× duplication. For each still-eligible candidate, derive 2–4 search terms from
-   `name` + the painpoint, then look for a real, maintained tool that solves it:
-   - `gh search repos "<terms>" --sort stars --limit 10` (preferred — structured).
-   - `WebFetch https://github.com/trending` (+ `?since=weekly`) for the live trending
-     board; cross-reference against the candidate.
-   - Match bar: the repo must actually *solve the pattern* (not keyword overlap),
-     carry real traction (≳1k★ or trending this week), and show recent commits.
-     Prefer the highest-traction maintained match.
-   - **Match** → `fix.approach: download`, `fix.what` =
-     `"<owner/repo> (<N>★) — <what it is>; <slice of the pattern it kills>"`,
-     `fix.tool_type` = that tool's form.
-   - **No real match** → `fix.approach: custom`. Don't force one.
+1. **Look up the painpoint (type-agnostic).** Cheapest signal → widest net:
+   - **Local inventory — per analyst, no web.** A known tool **installed-but-idle**
+     for this pattern (the `lazygit ×0 while git ×38` case) is the strongest match —
+     it's already on disk. Flag it for the rollup.
+   - **Web pass — over the deduped list, in the rollup.** One agent, one pass, no N×
+     duplication. Derive 2–4 terms from `name` + painpoint and search **every**
+     relevant registry, not just code hosts:
+     - **CLIs / TUIs / apps** — `gh search repos "<terms>" --sort stars --limit 10`;
+       `WebFetch https://github.com/trending?since=weekly`.
+     - **Skills / agents** — the official skill marketplace: `gh search repos
+       "<terms>" --owner anthropics`, or browse the `anthropics/skills` `skills/`
+       tree. A skill that already exists is a **download**, not a custom build.
+     - **MCP servers** — the MCP registries, when the friction is a missing capability.
+   - Match bar: it must actually *solve the painpoint* (not keyword overlap), carry
+     real traction (≳1k★, trending, or official), and show recent maintenance.
 
-If `gh` is absent or the web is unreachable, fall back to local-join + judgment and
-mark the candidate's `gate.confidence` down a notch — never block the rollup on the net.
+2. **Evaluate fit → set `fix.approach`.**
+   - **Good fit** → `fix.approach: download`, `fix.what` =
+     `"<owner/repo or skill> (<traction>) — <what it is>; <slice of the painpoint it kills>"`,
+     `fix.tool_type` = that thing's own form. Done — skip the table.
+   - **Partial / no fit** → `fix.approach: custom` (or `manual` for a pure habit/config
+     change). Don't force a bad match. Now — and only now — pick the form (next section).
+
+Per-lens analysts set `fix.approach` **provisionally** (local signal + judgment); the
+rollup's web pass settles it. If `gh` is absent or the web is unreachable, fall back to
+local inventory + judgment and mark `gate.confidence` down a notch — never block on the net.
 
 ### fix.tool_type — the form the fix takes
 
 A **download** brings its own form (set by the source check above). For **custom** /
 **manual**, walk this table top-to-bottom and take the **first** row that fits —
 ordered lightest → heaviest; the cheapest form that kills the pattern wins
-(disposability).
+(disposability). The one place to reach past "lightest" on purpose is the
+**`CLI + skill`** pairing below — when the pattern has both a mechanic and a
+judgment, that combo is usually the right answer, not over-build.
 
 | If the pattern is… | tool_type | e.g. |
 |---|---|---|
@@ -233,11 +247,23 @@ as a `+`-joined string, lightest-first: `"memory + skill + hook"`. Use a combo o
 when the pieces serve **one** outcome; if they solve two unrelated frictions, that's
 two candidates — split them.
 
+**Favor `CLI + skill` — the best of both worlds.** When a painpoint has a *repeatable
+mechanical core* (parse, tally, transform, drive a tool — deterministic work) **and**
+a *judgment layer* (knowing when and how to apply it), the strong answer is a small
+**CLI** carrying the mechanic **+** a **skill** carrying the judgment that invokes it.
+The CLI keeps the deterministic part out of the model (cheap, exact, testable); the
+skill keeps the agent in control of *when* to run it. Encourage this pairing wherever
+it fits — it beats a skill that re-derives mechanics every run, and a bare CLI the
+agent never remembers to use. (This is the deterministic/agentic split in miniature:
+mechanics in the CLI, judgment in the skill.)
+
 ### Rollup → patterns.json
 
-Run the **recommendations rollup** last (the registry's `forge` section,
-`rollup: true`): collect every analyst's suggestions, **dedup** (the same idea
-surfaces in multiple lenses), rank by payback/cumulative cost, and write:
+`core.scan` collects + validates every analyst's suggestions into one candidate
+list and hands it to the **recommendations rollup** (the registry's `forge`
+section, `rollup: true`) inline. You **dedup** (the same idea surfaces in multiple
+lenses), run the one **web source-check** over download-eligible candidates, rank by
+payback/cumulative cost, and write:
 
 ```json
 { "generated": "<ISO8601 at write time>", "patterns": [ <suggestion>, ... ] }
